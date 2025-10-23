@@ -1,4 +1,4 @@
-// Settings
-
-"ENABLED" = "Show Loop button";
-"POSITION" = "Loop button position";
+"ENABLED" = "Show Loop Video button";
+"POSITION" = "Loop Video button position";
+"LOOP_DISABLED" = "Loop Video Disabled";
+"LOOP_ENABLED" = "Loop Video Enabled";

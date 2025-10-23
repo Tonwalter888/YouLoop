@@ -100,7 +100,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         // Set the loop mode to the opposite of the current state
         [autoplayController setLoopMode:isLoopEnabled ? 2 : 0];
         // Display snackbar
-        [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(isLoopEnabled ? @"Loop enabled" : @"Loop disabled")]];
+        [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(isLoopEnabled ? @"LOOP_ENABLED" : @"LOOP_DISABLED")];
     }
 }
 %end
