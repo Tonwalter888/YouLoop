@@ -1,4 +1,4 @@
 "ENABLED" = "Show loop video button";
 "POSITION" = "Loop video button position";
-"LOOP_DISABLED" = "Loop video Disabled";
-"LOOP_ENABLED" = "Loop video Enabled";
+"LOOP_DISABLED" = "Loop video disabled";
+"LOOP_ENABLED" = "Loop video enabled";
