@@ -81,7 +81,6 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:[UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil] color:tintColor];
 }
 
-%group Main
 %hook YTPlayerViewController
 %new
 - (void)didPressYouLoop {
@@ -91,18 +90,14 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
         BOOL isCurrentlyLooping = ([autoplayController loopMode] == 2);
         BOOL newState = !isCurrentlyLooping;
-        // Apply new loop state
         [autoplayController setLoopMode:newState ? 2 : 0];
-        // Save preference for next videos
         [[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"defaultLoop_enabled"];
         [[NSUserDefaults standardUserDefaults] synchronize];
-        // Snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance]
             showMessageMainThread:[%c(YTHUDMessage)
             messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
     }
 }
-
 %end
 
 %hook YTAutoplayAutonavController
@@ -110,9 +105,19 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     self = %orig(arg1);
     if (self) {
         BOOL shouldLoop = IS_ENABLED(@"defaultLoop_enabled");
-        [self setLoopMode:shouldLoop ? 2 : 0]; // apply saved preference
+        if (shouldLoop) {
+            [self setLoopMode:2];
+        }
     }
     return self;
+}
+
+- (void)setLoopMode:(NSInteger)arg1 {
+    %orig;
+    BOOL shouldLoop = IS_ENABLED(@"defaultLoop_enabled");
+    if (shouldLoop && arg1 != 2) {
+        %orig(2);
+    }
 }
 %end
 %end
