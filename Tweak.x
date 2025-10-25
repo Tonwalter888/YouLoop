@@ -96,7 +96,6 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [autoplayController setLoopMode:newState ? 2 : 0];
         // Save new state
         [[NSUserDefaults standardUserDefaults] setBool:!isLoopEnabled forKey:@"defaultLoop_enabled"];
-        [[NSUserDefaults standardUserDefaults] synchronize];
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
