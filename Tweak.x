@@ -72,6 +72,7 @@ NSBundle *YouLoopBundle() {
     });
     return bundle;
 }
+static NSBundle *tweakBundle = nil;
 
 // Get the image for the loop button based on the given state and size
 static UIImage *getYouLoopImage(NSString *imageSize) {
@@ -178,6 +179,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %end
 
 %ctor {
+    tweakBundle = YouLoopBundle();
     // Setup as defined in the example from YTVideoOverlay
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"Toggle Loop",
