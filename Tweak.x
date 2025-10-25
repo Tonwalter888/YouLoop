@@ -87,17 +87,14 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
-    // Check if type is YTMainAppVideoPlayerOverlayViewController
     if ([mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) {
-        // Get the autoplay navigation controller
         YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-        // Get the current loop state from the controller's method
         BOOL isLoopEnabled = ([autoplayController loopMode] == 2);
-        // Set the loop mode to the opposite of the current state
         [autoplayController setLoopMode:isLoopEnabled ? 0 : 2];
-        // Update the key for later use
-        [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:@"defaultLoop_enabled"];
+        // Save new state
+        [[NSUserDefaults standardUserDefaults] setBool:!isLoopEnabled forKey:@"defaultLoop_enabled"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
@@ -142,7 +139,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
         [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
-}
+    }
 
 %end
 %end
@@ -172,7 +169,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
         [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
-}
+    }
 
 %end
 %end
