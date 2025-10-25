@@ -41,7 +41,7 @@
 @end
 
 @interface YTInlinePlayerBarContainerView (YouLoop)
-@property (nonatomic, strong) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
+@property (nonatomic, weak) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
