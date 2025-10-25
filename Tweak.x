@@ -142,6 +142,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     if ([btn isKindOfClass:[UIButton class]]) {
         [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
     }
+}
 
 %end
 %end
@@ -172,6 +173,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     if ([btn isKindOfClass:[UIButton class]]) {
         [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
     }
+}
 
 %end
 %end
