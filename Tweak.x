@@ -92,14 +92,15 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
         BOOL isLoopEnabled = ([autoplayController loopMode] == 2);
-        [autoplayController setLoopMode:isLoopEnabled ? 0 : 2];
+        BOOL newState = !isLoopEnabled;
+        [autoplayController setLoopMode:newState ? 2 : 0];
         // Save new state
         [[NSUserDefaults standardUserDefaults] setBool:!isLoopEnabled forKey:@"defaultLoop_enabled"];
         [[NSUserDefaults standardUserDefaults] synchronize];
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
-            messageWithText:(isLoopEnabled ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+            messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
     }
 }
 %end
