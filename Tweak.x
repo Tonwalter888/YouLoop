@@ -81,6 +81,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:[UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil] color:tintColor];
 }
 
+%group Main
 %hook YTPlayerViewController
 %new
 - (void)didPressYouLoop {
@@ -119,6 +120,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         %orig(2);
     }
 }
+%end
 %end
 
 /**
