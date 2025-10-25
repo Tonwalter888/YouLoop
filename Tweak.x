@@ -108,8 +108,9 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        BOOL isLooping = ([self loopMode] == 2);
-        [[NSUserDefaults standardUserDefaults] setBool:isLooping forKey:@"defaultLoop_enabled"];
+        // Read saved default
+        BOOL shouldLoop = [[NSUserDefaults standardUserDefaults] boolForKey:@"defaultLoop_enabled"];
+        [self setLoopMode: shouldLoop ? 2 : 0];
     }
     return self;
 }
