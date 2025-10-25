@@ -13,7 +13,6 @@
 
 #define TweakKey @"YouLoop"
 #define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:k]
-#define LOC(x) x
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
 @property (nonatomic, weak) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
