@@ -102,7 +102,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
-            messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+            messageWithText:(isLoopEnabled ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
     }
 }
 %end
