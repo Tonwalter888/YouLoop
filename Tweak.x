@@ -15,7 +15,7 @@
 #define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:k]
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
-@property (nonatomic, assign) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
+@property (nonatomic, weak) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
 @end
 
 @interface YTMainAppVideoPlayerOverlayView (YouLoop)
@@ -32,7 +32,7 @@
 @end
 
 @interface YTMainAppControlsOverlayView (YouLoop)
-@property (nonatomic, assign) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
+@property (nonatomic, weak) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
@@ -72,7 +72,6 @@ NSBundle *YouLoopBundle() {
     });
     return bundle;
 }
-static NSBundle *tweakBundle = nil; // not sure why I need to store tweakBundle
 
 // Get the image for the loop button based on the given state and size
 static UIImage *getYouLoopImage(NSString *imageSize) {
@@ -94,11 +93,11 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
         // Get the current loop state from the controller's method
-        BOOL isLoopEnabled = ([autoplayController loopMode] == 0);
+        BOOL isLoopEnabled = ([autoplayController loopMode] == 2);
+        // Set the loop mode to the opposite of the current state
+        [autoplayController setLoopMode:isLoopEnabled ? 0 : 2];
         // Update the key for later use
         [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:@"defaultLoop_enabled"];
-        // Set the loop mode to the opposite of the current state
-        [autoplayController setLoopMode:isLoopEnabled ? 2 : 0];
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
@@ -108,22 +107,13 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %end
 
 %hook YTAutoplayAutonavController
-// Modify the initializer to set the loop mode to the user's preference
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        if (IS_ENABLED(@"defaultLoop_enabled")) {
-            [self setLoopMode:2];
-        }
+        BOOL isLooping = ([self loopMode] == 2);
+        [[NSUserDefaults standardUserDefaults] setBool:isLooping forKey:@"defaultLoop_enabled"];
     }
     return self;
-}
-// Modify the setter to always follow the user's preference. This breaks normal functionality
-- (void)setLoopMode:(NSInteger)arg1 {
-    if (IS_ENABLED(@"defaultLoop_enabled")) {
-        arg1 = 2;
-    }
-    %orig;
 }
 %end
 %end
@@ -149,7 +139,9 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [playerViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
+    UIButton *btn = self.overlayButtons[TweakKey];
+    if ([btn isKindOfClass:[UIButton class]]) {
+        [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
 }
 
 %end
@@ -177,14 +169,15 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [parentViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
+    UIButton *btn = self.overlayButtons[TweakKey];
+    if ([btn isKindOfClass:[UIButton class]]) {
+        [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
 }
 
 %end
 %end
 
 %ctor {
-    tweakBundle = YouLoopBundle(); // not sure why I need to store tweakBundle
     // Setup as defined in the example from YTVideoOverlay
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"Toggle Loop",
