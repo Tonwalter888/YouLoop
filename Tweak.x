@@ -120,7 +120,6 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     }
 }
 %end
-%end
 
 /**
   * Adds a button to the top area in the video player overlay
