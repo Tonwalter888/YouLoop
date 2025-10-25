@@ -15,7 +15,7 @@
 #define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:k]
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
-@property (nonatomic, weak) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
+@property (nonatomic, assign) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
 @end
 
 @interface YTMainAppVideoPlayerOverlayView (YouLoop)
@@ -32,7 +32,7 @@
 @end
 
 @interface YTMainAppControlsOverlayView (YouLoop)
-@property (nonatomic, weak) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
+@property (nonatomic, assign) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
@@ -41,7 +41,7 @@
 @end
 
 @interface YTInlinePlayerBarContainerView (YouLoop)
-@property (nonatomic, weak) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
+@property (nonatomic, strong) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
@@ -72,7 +72,7 @@ NSBundle *YouLoopBundle() {
     });
     return bundle;
 }
-static NSBundle *tweakBundle = nil;
+static NSBundle *tweakBundle = nil; // not sure why I need to store tweakBundle
 
 // Get the image for the loop button based on the given state and size
 static UIImage *getYouLoopImage(NSString *imageSize) {
@@ -88,14 +88,17 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
+    // Check if type is YTMainAppVideoPlayerOverlayViewController
     if ([mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) {
+        // Get the autoplay navigation controller
         YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-        BOOL isLoopEnabled = ([autoplayController loopMode] == 2);
-        BOOL newState = !isLoopEnabled;
-        [autoplayController setLoopMode:newState ? 2 : 0];
-        // Save new state
-        [[NSUserDefaults standardUserDefaults] setBool:!isLoopEnabled forKey:@"defaultLoop_enabled"];
+        // Get the current loop state from the controller's method
+        BOOL isLoopEnabled = ([autoplayController loopMode] == 0);
+        // Update the key for later use
+        [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:@"defaultLoop_enabled"];
+        // Set the loop mode to the opposite of the current state
+        [autoplayController setLoopMode:isLoopEnabled ? 2 : 0];
         // Display snackbar
         [[%c(GOOHUDManagerInternal) sharedInstance] 
             showMessageMainThread:[%c(YTHUDMessage)  
@@ -105,14 +108,22 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %end
 
 %hook YTAutoplayAutonavController
+// Modify the initializer to set the loop mode to the user's preference
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        // Read saved default
-        BOOL shouldLoop = [[NSUserDefaults standardUserDefaults] boolForKey:@"defaultLoop_enabled"];
-        [self setLoopMode: shouldLoop ? 2 : 0];
+        if (IS_ENABLED(@"defaultLoop_enabled")) {
+            [self setLoopMode:2];
+        }
     }
     return self;
+}
+// Modify the setter to always follow the user's preference. This breaks normal functionality
+- (void)setLoopMode:(NSInteger)arg1 {
+    if (IS_ENABLED(@"defaultLoop_enabled")) {
+        arg1 = 2;
+    }
+    %orig;
 }
 %end
 %end
@@ -138,10 +149,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [playerViewController didPressYouLoop];
     }
     // Update button color
-    UIButton *btn = self.overlayButtons[TweakKey];
-    if ([btn isKindOfClass:[UIButton class]]) {
-        [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
-    }
+    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
 }
 
 %end
@@ -169,17 +177,14 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [parentViewController didPressYouLoop];
     }
     // Update button color
-    UIButton *btn = self.overlayButtons[TweakKey];
-    if ([btn isKindOfClass:[UIButton class]]) {
-        [btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
-    }
+    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
 }
 
 %end
 %end
 
 %ctor {
-    tweakBundle = YouLoopBundle();
+    tweakBundle = YouLoopBundle(); // not sure why I need to store tweakBundle
     // Setup as defined in the example from YTVideoOverlay
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"Toggle Loop",
