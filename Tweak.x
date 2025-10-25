@@ -83,47 +83,36 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 
 %group Main
 %hook YTPlayerViewController
-// New method to enable looping on the current video, also stores state
-// for all future videos
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
-    // Check if type is YTMainAppVideoPlayerOverlayViewController
     if ([mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) {
-        // Get the autoplay navigation controller
         YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
         YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-        // Get the current loop state from the controller's method
-        BOOL isLoopEnabled = ([autoplayController loopMode] == 0);
-        // Update the key for later use
-        [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:@"defaultLoop_enabled"];
-        // Set the loop mode to the opposite of the current state
-        [autoplayController setLoopMode:isLoopEnabled ? 2 : 0];
-        // Display snackbar
-        [[%c(GOOHUDManagerInternal) sharedInstance] 
-            showMessageMainThread:[%c(YTHUDMessage)  
-            messageWithText:(isLoopEnabled ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+        BOOL isCurrentlyLooping = ([autoplayController loopMode] == 2);
+        BOOL newState = !isCurrentlyLooping;
+        // Apply new loop state
+        [autoplayController setLoopMode:newState ? 2 : 0];
+        // Save preference for next videos
+        [[NSUserDefaults standardUserDefaults] setBool:newState forKey:@"defaultLoop_enabled"];
+        [[NSUserDefaults standardUserDefaults] synchronize];
+        // Snackbar
+        [[%c(GOOHUDManagerInternal) sharedInstance]
+            showMessageMainThread:[%c(YTHUDMessage)
+            messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
     }
 }
+
 %end
 
 %hook YTAutoplayAutonavController
-// Modify the initializer to set the loop mode to the user's preference
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        if (IS_ENABLED(@"defaultLoop_enabled")) {
-            [self setLoopMode:2];
-        }
+        BOOL shouldLoop = IS_ENABLED(@"defaultLoop_enabled");
+        [self setLoopMode:shouldLoop ? 2 : 0]; // apply saved preference
     }
     return self;
-}
-// Modify the setter to always follow the user's preference. This breaks normal functionality
-- (void)setLoopMode:(NSInteger)arg1 {
-    if (IS_ENABLED(@"defaultLoop_enabled")) {
-        arg1 = 2;
-    }
-    %orig;
 }
 %end
 %end
