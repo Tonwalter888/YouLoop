@@ -123,7 +123,6 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     }
 }
 %end
-%end
 
 %hook YTAutoplayAutonavController
 
@@ -150,6 +149,7 @@ static BOOL yl_forcing = NO;
         yl_forcing = NO;
     }
 }
+%end
 %end
 
 /**
@@ -207,7 +207,6 @@ static BOOL yl_forcing = NO;
         AccessibilityLabelKey: @"Toggle Loop",
         SelectorKey: @"didPressYouLoop:"
     });
-    %init(_ungrouped);
     %init(Main);
     %init(Top);
     %init(Bottom);
