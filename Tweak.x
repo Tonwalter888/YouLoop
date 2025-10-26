@@ -207,6 +207,7 @@ static BOOL yl_forcing = NO;
         AccessibilityLabelKey: @"Toggle Loop",
         SelectorKey: @"didPressYouLoop:"
     });
+    %init(_ungrouped);
     %init(Main);
     %init(Top);
     %init(Bottom);
