@@ -90,14 +90,12 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
-    if (![mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) {
-        return;
-    }
+    if (![mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) return;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
     YTAutoplayAutonavController *autoplayController = nil;
     @try {
         autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    } @catch (__unused NSException *e) { return; }
+    } @catch (__unused NSException *e) {}
     if (!autoplayController) return;
     BOOL newState = !IS_ENABLED(LOOP_KEY);
     [[NSUserDefaults standardUserDefaults] setBool:newState forKey:LOOP_KEY];
@@ -108,6 +106,23 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
 }
 
+// Ensure saved preference is applied when player view appears (first launch / video switch)
+- (void)viewDidAppear:(BOOL)animated {
+    %orig;
+    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
+    if (!shouldLoop) return;
+    id mainAppController = self.activeVideoPlayerOverlay;
+    if (![mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) return;
+    YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
+    YTAutoplayAutonavController *autoplayController = nil;
+    @try {
+        autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
+    } @catch (__unused NSException *e) {}
+    if (autoplayController) {
+        [autoplayController setLoopMode:2];
+    }
+}
+%end
 %end
 
 %hook YTAutoplayAutonavController
@@ -121,14 +136,12 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     return self;
 }
 
-// Re-apply the saved state if YouTube resets it (with reentrancy guard)
 static BOOL yl_forcing = NO;
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
     if (yl_forcing) return;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
-    // If the current mode differs from the saved preference, gently re-apply it
     NSInteger current = 0;
     @try { current = [self loopMode]; } @catch (__unused NSException *e) { current = arg1; }
     if (current != target) {
@@ -137,13 +150,11 @@ static BOOL yl_forcing = NO;
         yl_forcing = NO;
     }
 }
-
-%end
 %end
 
 /**
-  * Adds a button to the top area in the video player overlay
-  */
+ * Adds a button to the top area
+ */
 %group Top
 %hook YTMainAppControlsOverlayView
 
@@ -165,6 +176,9 @@ static BOOL yl_forcing = NO;
 %end
 %end
 
+/**
+ * Adds a button to the bottom area
+ */
 %group Bottom
 %hook YTInlinePlayerBarContainerView
 
@@ -188,8 +202,7 @@ static BOOL yl_forcing = NO;
 %end
 
 %ctor {
-    tweakBundle = YouLoopBundle(); // not sure why I need to store tweakBundle
-    // Setup as defined in the example from YTVideoOverlay
+    tweakBundle = YouLoopBundle();
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"Toggle Loop",
         SelectorKey: @"didPressYouLoop:"
