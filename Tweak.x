@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
-
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTColor.h>
@@ -10,6 +9,8 @@
 #import <YouTubeHeader/YTMainAppControlsOverlayView.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
 #import <YouTubeHeader/QTMIcon.h>
+#import <YouTubeHeader/YTHUDMessage.h>
+#import <YouTubeHeader/GOOHUDManagerInternal.h>
 
 #define TweakKey @"YouLoop"
 #define LOOP_KEY @"defaultLoop_enabled"
@@ -33,7 +34,6 @@
 @end
 
 @interface YTMainAppControlsOverlayView (YouLoop)
-@property (nonatomic, assign) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
@@ -48,16 +48,6 @@
 
 @interface YTColor (YouLoop)
 + (UIColor *)lightRed; // for tinting the loop button when enabled
-@end
-
-// For displaying snackbars - @theRealfoxster
-@interface YTHUDMessage : NSObject
-+ (id)messageWithText:(id)text;
-- (void)setAction:(id)action;
-@end
-@interface GOOHUDManagerInternal : NSObject
-- (void)showMessageMainThread:(id)message;
-+ (id)sharedInstance;
 @end
 
 // Retrieves the bundle for the tweak
@@ -204,7 +194,7 @@ static BOOL yl_forcing = NO;
 %ctor {
     tweakBundle = YouLoopBundle();
     initYTVideoOverlay(TweakKey, @{
-        AccessibilityLabelKey: @"Toggle Loop",
+        AccessibilityLabelKey: @"YouLoop",
         SelectorKey: @"didPressYouLoop:"
     });
     %init(Main);
