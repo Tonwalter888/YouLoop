@@ -9,7 +9,6 @@
 #import <YouTubeHeader/YTMainAppControlsOverlayView.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
 #import <YouTubeHeader/QTMIcon.h>
-#import <YouTubeHeader/YTHUDMessage.h>
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
 
 #define TweakKey @"YouLoop"

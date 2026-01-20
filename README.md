@@ -1,9 +1,10 @@
 # YouLoop
-
 Adds a player button to enable/disable looping on the current video.
-
-This tweak would not be possible without the work done by PoomSmart and arichornlover.
 
 Repeat icons created by Uniconlabs - Flaticon.
 
-Dependency: https://github.com/PoomSmart/YTVideoOverlay
+## Building
+- Clone [Theos](https://github.com/theos/theos) along with its submodules.
+- Clone and Copy [iOS 18.6 SDK](https://github.com/Tonwalter888/iOS-18.6-SDK) to ``$THEOS/sdks``.
+- Go into your theos folder,cd back ``cd ..`` and clone [YTVideoOverlay](https://github.com/PoomSmart/YTVideoOverlay) there.
+- Clone YouLoop,cd into it and run ``make clean package DEBUG=0 FINALPACKAGE=1 THEOS_PACKAGE_SCHEME=rootless``. (You can remove the ``THEOS_PACKAGE_SCHEME=rootless`` part if you are using in jailbroken iOS.)
