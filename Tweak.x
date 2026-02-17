@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
+#import <PSHeader/Misc.h>
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTColor.h>
@@ -58,16 +59,17 @@ NSBundle *YouLoopBundle() {
         if (tweakBundlePath)
             bundle = [NSBundle bundleWithPath:tweakBundlePath];
         else
-            bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:ROOT_PATH_NS(@"/Library/Application Support/%@.bundle"), TweakKey]];
+            bundle = [NSBundle bundleWithPath:[NSString stringWithFormat:PS_ROOT_PATH_NS(@"/Library/Application Support/%@.bundle"), TweakKey]];
     });
     return bundle;
 }
-static NSBundle *tweakBundle = nil; // not sure why I need to store tweakBundle
+
+static NSBundle *tweakBundle = nil;
 
 // Get the image for the loop button based on the given state and size
 static UIImage *getYouLoopImage(NSString *imageSize) {
     UIColor *tintColor = IS_ENABLED(LOOP_KEY) ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
-    NSString *imageName = [NSString stringWithFormat:@"PlayerLoop@%@", imageSize];
+    NSString *imageName = [NSString stringWithFormat:@"Loop@%@", imageSize];
     UIImage *base = [UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil];
     if (!base) { base = [UIImage systemImageNamed:@"repeat"]; }
     return [%c(QTMIcon) tintImage:base color:tintColor];
@@ -75,7 +77,6 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 
 %group Main
 %hook YTPlayerViewController
-
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
