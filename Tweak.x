@@ -145,7 +145,8 @@ static BOOL ForceLoop = NO;
     if (pvc) [pvc didPressYouLoop];
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-    btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+    }
 }
 
 %end
@@ -169,7 +170,7 @@ static BOOL ForceLoop = NO;
     if (pvc) [pvc didPressYouLoop];
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-    btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
     }
 }
 
