@@ -1,7 +1,6 @@
 #import <Foundation/Foundation.h>
 #import <AVFoundation/AVFoundation.h>
 #import <AVKit/AVKit.h>
-#import <PSHeader/Misc.h>
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTColor.h>
@@ -11,13 +10,14 @@
 #import <YouTubeHeader/YTPlayerViewController.h>
 #import <YouTubeHeader/QTMIcon.h>
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
+#import <YouTubeHeader/YTInlinePlayerBarContainerView.h>
 
 #define TweakKey @"YouLoop"
 #define LOOP_KEY @"defaultLoop_enabled"
 #define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:(k)]
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
-@property (nonatomic, assign) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
+@property (nonatomic, assign) YTPlayerViewController *parentViewController;
 @end
 
 @interface YTMainAppVideoPlayerOverlayView (YouLoop)
@@ -25,32 +25,29 @@
 @end
 
 @interface YTPlayerViewController (YouLoop)
-- (void)didPressYouLoop; // contains actual logic for enabling/disabling loop
+- (void)didPressYouLoop;
 @end
 
 @interface YTAutoplayAutonavController : NSObject
-- (NSInteger)loopMode; // for reading loop state
-- (void)setLoopMode:(NSInteger)loopMode; // for setting loop state
+- (NSInteger)loopMode;
+- (void)setLoopMode:(NSInteger)loopMode;
 @end
 
 @interface YTMainAppControlsOverlayView (YouLoop)
-- (void)didPressYouLoop:(id)arg; // for custom button press
+- (void)didPressYouLoop:(id)arg;
 @end
 
-// For accessing YTPlayerViewController
 @interface YTInlinePlayerBarController : NSObject
 @end
 
 @interface YTInlinePlayerBarContainerView (YouLoop)
-@property (nonatomic, strong) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
-- (void)didPressYouLoop:(id)arg; // for custom button press
+- (void)didPressYouLoop:(id)arg;
 @end
 
 @interface YTColor (YouLoop)
-+ (UIColor *)lightRed; // for tinting the loop button when enabled
++ (UIColor *)lightRed;
 @end
 
-// Retrieves the bundle for the tweak
 NSBundle *YouLoopBundle() {
     static NSBundle *bundle = nil;
     static dispatch_once_t onceToken;
@@ -66,12 +63,10 @@ NSBundle *YouLoopBundle() {
 
 static NSBundle *tweakBundle = nil;
 
-// Get the image for the loop button based on the given state and size
-static UIImage *getYouLoopImage(NSString *imageSize) {
+static UIImage *YouLoopIcon(NSString *imageSize) {
     UIColor *tintColor = IS_ENABLED(LOOP_KEY) ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     NSString *imageName = [NSString stringWithFormat:@"Loop@%@", imageSize];
     UIImage *base = [UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil];
-    if (!base) { base = [UIImage systemImageNamed:@"repeat"]; }
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
@@ -80,20 +75,15 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %new
 - (void)didPressYouLoop {
     id mainAppController = self.activeVideoPlayerOverlay;
-    if (![mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) return;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
-    YTAutoplayAutonavController *autoplayController = nil;
-    @try {
-        autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    } @catch (__unused NSException *e) {}
-    if (!autoplayController) return;
-    BOOL newState = !IS_ENABLED(LOOP_KEY);
-    [[NSUserDefaults standardUserDefaults] setBool:newState forKey:LOOP_KEY];
+    YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
+    BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
+    [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [autoplayController setLoopMode:newState ? 2 : 0];
+    [autoplayController setLoopMode:LoopStatus ? 2 : 0];
     [[%c(GOOHUDManagerInternal) sharedInstance]
         showMessageMainThread:[%c(YTHUDMessage)
-        messageWithText:(newState ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+        messageWithText:(LoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
 }
 
 // Ensure saved preference is applied when player view appears (first launch / video switch)
@@ -102,12 +92,8 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     if (!shouldLoop) return;
     id mainAppController = self.activeVideoPlayerOverlay;
-    if (![mainAppController isKindOfClass:objc_getClass("YTMainAppVideoPlayerOverlayViewController")]) return;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
-    YTAutoplayAutonavController *autoplayController = nil;
-    @try {
-        autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    } @catch (__unused NSException *e) {}
+    YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
     if (autoplayController) {
         [autoplayController setLoopMode:2];
     }
@@ -125,20 +111,20 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     return self;
 }
 
-static BOOL yl_forcing = NO;
+static BOOL ForceLoop = NO;
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
-    if (yl_forcing) return;
+    if (ForceLoop) return;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
-    NSInteger current = 0;
-    @try { current = [self loopMode]; } @catch (__unused NSException *e) { current = arg1; }
+    NSInteger current = [self loopMode];
     if (current != target) {
-        yl_forcing = YES;
+        ForceLoop = YES;
         %orig(target);
-        yl_forcing = NO;
+        ForceLoop = NO;
     }
 }
+
 %end
 %end
 
@@ -149,20 +135,21 @@ static BOOL yl_forcing = NO;
 %hook YTMainAppControlsOverlayView
 
 - (UIImage *)buttonImage:(NSString *)tweakId {
-    return [tweakId isEqualToString:TweakKey] ? getYouLoopImage(@"3") : %orig;
+    return [tweakId isEqualToString:TweakKey] ? YouLoopIcon(@"3") : %orig;
 }
 
 %new(v@:@)
 - (void)didPressYouLoop:(id)arg {
     YTMainAppVideoPlayerOverlayView *mainOverlayView = (YTMainAppVideoPlayerOverlayView *)self.superview;
     YTMainAppVideoPlayerOverlayViewController *mainOverlayController = (YTMainAppVideoPlayerOverlayViewController *)mainOverlayView.delegate;
-    YTPlayerViewController *playerVC = mainOverlayController.parentViewController;
-    if (playerVC) [playerVC didPressYouLoop];
+    YTPlayerViewController *pvc = mainOverlayController.parentViewController;
+    if (pvc) [pvc didPressYouLoop];
     id btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        [(UIButton *)btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
+        [(UIButton *)btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
     }
 }
+
 %end
 %end
 
@@ -173,21 +160,21 @@ static BOOL yl_forcing = NO;
 %hook YTInlinePlayerBarContainerView
 
 - (UIImage *)buttonImage:(NSString *)tweakId {
-    return [tweakId isEqualToString:TweakKey] ? getYouLoopImage(@"3") : %orig;
+    return [tweakId isEqualToString:TweakKey] ? YouLoopIcon(@"3") : %orig;
 }
 
 %new(v@:@)
 - (void)didPressYouLoop:(id)arg {
     YTInlinePlayerBarController *delegate = self.delegate;
-    YTMainAppVideoPlayerOverlayViewController *_delegate = nil;
-    @try { _delegate = [delegate valueForKey:@"_delegate"]; } @catch (__unused NSException *e) {}
+    YTMainAppVideoPlayerOverlayViewController *_delegate = [delegate valueForKey:@"_delegate"];
     YTPlayerViewController *parentVC = _delegate.parentViewController;
     if (parentVC) [parentVC didPressYouLoop];
-    id btn = self.overlayButtons[TweakKey];
+    UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        [(UIButton *)btn setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
+    btn.tintColor = isLoopEnabled ? [YTColor lightRed] : [YTColor white1];
     }
 }
+
 %end
 %end
 
