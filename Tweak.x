@@ -1,4 +1,3 @@
-#import <Foundation/Foundation.h>
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTMainAppVideoPlayerOverlayViewController.h>
