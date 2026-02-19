@@ -70,9 +70,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
-BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
-BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-BOOL ForceLoop = NO;
+static BOOL ForceLoop = NO;
 
 %group Main
 %hook YTPlayerViewController
@@ -81,6 +79,7 @@ BOOL ForceLoop = NO;
     id mainAppController = self.activeVideoPlayerOverlay;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
+    BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
     [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [autoplayController setLoopMode:LoopStatus ? 2 : 0];
@@ -92,6 +91,7 @@ BOOL ForceLoop = NO;
 // Ensure saved preference is applied when player view appears (first launch / video switch)
 - (void)viewDidAppear:(BOOL)animated {
     %orig;
+    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     if (!shouldLoop) return;
     id mainAppController = self.activeVideoPlayerOverlay;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
@@ -106,6 +106,7 @@ BOOL ForceLoop = NO;
 
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
+    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     if (self) {
         [self setLoopMode:shouldLoop ? 2 : 0];
     }
@@ -115,6 +116,7 @@ BOOL ForceLoop = NO;
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
     if (ForceLoop) return;
+    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
     NSInteger current = [self loopMode];
     if (current != target) {
@@ -145,7 +147,7 @@ BOOL ForceLoop = NO;
     if (pvc) [pvc didPressYouLoop];
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
     }
 }
 
@@ -170,7 +172,7 @@ BOOL ForceLoop = NO;
     if (pvc) [pvc didPressYouLoop];
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
     }
 }
 
