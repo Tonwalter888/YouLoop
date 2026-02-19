@@ -13,7 +13,7 @@
 #import <YouTubeHeader/YTInlinePlayerBarContainerView.h>
 
 #define TweakKey @"YouLoop"
-#define LOOP_KEY @"defaultLoop_enabled"
+#define LOOP_KEY @"YouLoopKey"
 #define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:(k)]
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
@@ -70,6 +70,10 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
+static BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
+static BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
+static BOOL ForceLoop = NO;
+
 %group Main
 %hook YTPlayerViewController
 %new
@@ -77,7 +81,6 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     id mainAppController = self.activeVideoPlayerOverlay;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
     [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [autoplayController setLoopMode:LoopStatus ? 2 : 0];
@@ -89,7 +92,6 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 // Ensure saved preference is applied when player view appears (first launch / video switch)
 - (void)viewDidAppear:(BOOL)animated {
     %orig;
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     if (!shouldLoop) return;
     id mainAppController = self.activeVideoPlayerOverlay;
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
@@ -105,17 +107,14 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
         [self setLoopMode:shouldLoop ? 2 : 0];
     }
     return self;
 }
 
-static BOOL ForceLoop = NO;
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
     if (ForceLoop) return;
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
     NSInteger current = [self loopMode];
     if (current != target) {
@@ -144,10 +143,9 @@ static BOOL ForceLoop = NO;
     YTMainAppVideoPlayerOverlayViewController *mainOverlayController = (YTMainAppVideoPlayerOverlayViewController *)mainOverlayView.delegate;
     YTPlayerViewController *pvc = mainOverlayController.parentViewController;
     if (pvc) [pvc didPressYouLoop];
-    id btn = self.overlayButtons[TweakKey];
+    UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        [(UIButton *)btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
-    }
+    btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
 }
 
 %end
@@ -167,11 +165,11 @@ static BOOL ForceLoop = NO;
 - (void)didPressYouLoop:(id)arg {
     YTInlinePlayerBarController *delegate = self.delegate;
     YTMainAppVideoPlayerOverlayViewController *_delegate = [delegate valueForKey:@"_delegate"];
-    YTPlayerViewController *parentVC = _delegate.parentViewController;
-    if (parentVC) [parentVC didPressYouLoop];
+    YTPlayerViewController *pvc = _delegate.parentViewController;
+    if (pvc) [pvc didPressYouLoop];
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-    btn.tintColor = isLoopEnabled ? [YTColor lightRed] : [YTColor white1];
+    btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
     }
 }
 
