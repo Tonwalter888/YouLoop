@@ -5,6 +5,7 @@
 #import <YouTubeHeader/YTMainAppVideoPlayerOverlayView.h>
 #import <YouTubeHeader/YTMainAppControlsOverlayView.h>
 #import <YouTubeHeader/YTPlayerViewController.h>
+#import <YouTubeHeader/YTColor.h>
 #import <YouTubeHeader/QTMIcon.h>
 #import <YouTubeHeader/GOOHUDManagerInternal.h>
 #import <YouTubeHeader/YTInlinePlayerBarContainerView.h>
