@@ -142,10 +142,9 @@ static BOOL ForceLoop = NO;
     YTMainAppVideoPlayerOverlayViewController *mainOverlayController = (YTMainAppVideoPlayerOverlayViewController *)mainOverlayView.delegate;
     YTPlayerViewController *pvc = mainOverlayController.parentViewController;
     if (pvc) [pvc didPressYouLoop];
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
+        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
     }
 }
 
@@ -168,10 +167,9 @@ static BOOL ForceLoop = NO;
     YTMainAppVideoPlayerOverlayViewController *_delegate = [delegate valueForKey:@"_delegate"];
     YTPlayerViewController *pvc = _delegate.parentViewController;
     if (pvc) [pvc didPressYouLoop];
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
+        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
     }
 }
 
