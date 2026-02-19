@@ -148,7 +148,7 @@ static BOOL ForceLoop = NO;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        btn.tintColor = shouldLoop ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     }
 }
 
@@ -174,7 +174,7 @@ static BOOL ForceLoop = NO;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     UIButton *btn = self.overlayButtons[TweakKey];
     if ([btn isKindOfClass:[UIButton class]]) {
-        btn.tintColor = shouldLoop ? [YTColor lightRed] : [YTColor white1];
+        btn.tintColor = shouldLoop ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     }
 }
 
