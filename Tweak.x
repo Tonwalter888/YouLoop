@@ -70,9 +70,9 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
-static BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
-static BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-static BOOL ForceLoop = NO;
+BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
+BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
+BOOL ForceLoop = NO;
 
 %group Main
 %hook YTPlayerViewController
