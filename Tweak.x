@@ -97,6 +97,7 @@ static BOOL ForceLoop = NO;
         [autoplayController setLoopMode:2];
     }
 }
+
 %end
 
 %hook YTAutoplayAutonavController
