@@ -80,9 +80,7 @@ static BOOL ForceLoop = NO;
     [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [autoplayController setLoopMode:LoopStatus ? 2 : 0];
-    [[%c(GOOHUDManagerInternal) sharedInstance]
-        showMessageMainThread:[%c(YTHUDMessage)
-        messageWithText:(LoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(LoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
 }
 
 // Ensure saved preference is applied when player view appears (first launch / video switch)
