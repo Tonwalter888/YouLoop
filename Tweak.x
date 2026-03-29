@@ -81,19 +81,6 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(LoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
 }
 
-// Ensure saved preference is applied when player view appears (first launch / video switch)
-- (void)viewDidAppear:(BOOL)animated {
-    %orig;
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-    if (!shouldLoop) return;
-    id mainAppController = self.activeVideoPlayerOverlay;
-    YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
-    YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    if (autoplayController) {
-        [autoplayController setLoopMode:2];
-    }
-}
-
 %end
 
 %hook YTAutoplayAutonavController
