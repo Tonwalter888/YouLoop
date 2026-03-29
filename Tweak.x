@@ -90,7 +90,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     self = %orig;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger current = [self loopMode];
-    if (self && shouldLoop && current == 0) {
+    if (self && shouldLoop && current != 2) {
         [self setLoopMode:2];
     }
     return self;
@@ -102,11 +102,10 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
         %orig;
         return;
     }
-    NSInteger target = shouldLoop ? 2 : 0;
     NSInteger current = [self loopMode];
-    if (current != target) {
+    if (current != 2) {
         ForceLoop = YES;
-        %orig(target);
+        %orig(2);
         ForceLoop = NO;
     }
 }
