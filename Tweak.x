@@ -141,10 +141,7 @@ static BOOL ForceLoop = NO;
     YTMainAppVideoPlayerOverlayViewController *mainOverlayController = (YTMainAppVideoPlayerOverlayViewController *)mainOverlayView.delegate;
     YTPlayerViewController *pvc = mainOverlayController.parentViewController;
     if (pvc) [pvc didPressYouLoop];
-    UIButton *btn = self.overlayButtons[TweakKey];
-    if ([btn isKindOfClass:[UIButton class]]) {
-        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
-    }
+    [self.overlayButtons[TweakKey] setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
 }
 
 %end
@@ -166,10 +163,7 @@ static BOOL ForceLoop = NO;
     YTMainAppVideoPlayerOverlayViewController *_delegate = [delegate valueForKey:@"_delegate"];
     YTPlayerViewController *pvc = _delegate.parentViewController;
     if (pvc) [pvc didPressYouLoop];
-    UIButton *btn = self.overlayButtons[TweakKey];
-    if ([btn isKindOfClass:[UIButton class]]) {
-        [btn setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
-    }
+    [self.overlayButtons[TweakKey] setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
 }
 
 %end
