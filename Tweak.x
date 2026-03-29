@@ -60,6 +60,8 @@ NSBundle *YouLoopBundle() {
 
 static NSBundle *tweakBundle = nil;
 
+static BOOL ForceLoop = NO;
+
 static UIImage *YouLoopIcon(NSString *imageSize) {
     UIColor *tintColor = IS_ENABLED(LOOP_KEY) ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     NSString *imageName = [NSString stringWithFormat:@"Loop@%@", imageSize];
@@ -96,11 +98,14 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
+    if (ForceLoop) return;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
     NSInteger current = [self loopMode];
     if (current != target) {
+        ForceLoop = YES;
         %orig(target);
+        ForceLoop = NO;
     }
 }
 
