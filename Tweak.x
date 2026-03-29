@@ -67,8 +67,6 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
-static BOOL ForceLoop = NO;
-
 %group Main
 %hook YTPlayerViewController
 %new
@@ -111,14 +109,11 @@ static BOOL ForceLoop = NO;
 
 - (void)setLoopMode:(NSInteger)arg1 {
     %orig;
-    if (ForceLoop) return;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
     NSInteger target = shouldLoop ? 2 : 0;
     NSInteger current = [self loopMode];
     if (current != target) {
-        ForceLoop = YES;
         %orig(target);
-        ForceLoop = NO;
     }
 }
 
