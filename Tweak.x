@@ -73,8 +73,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 %hook YTPlayerViewController
 %new
 - (void)didPressYouLoop {
-    id mainAppController = self.activeVideoPlayerOverlay;
-    YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)mainAppController;
+    YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)self.activeVideoPlayerOverlay;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
     BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
     [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
@@ -90,7 +89,8 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-    if (self && shouldLoop) {
+    NSInteger current = [self loopMode];
+    if (self && shouldLoop && current == 0) {
         [self setLoopMode:2];
     }
     return self;
