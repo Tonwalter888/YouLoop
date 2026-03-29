@@ -89,8 +89,8 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig;
     BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-    NSInteger current = [self loopMode];
-    if (self && shouldLoop && current != 2) {
+    NSInteger currentLoopMode = [self loopMode];
+    if (self && shouldLoop && currentLoopMode != 2) {
         [self setLoopMode:2];
     }
     return self;
@@ -102,8 +102,8 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
         %orig;
         return;
     }
-    NSInteger current = [self loopMode];
-    if (current != 2) {
+    NSInteger currentLoopMode = [self loopMode];
+    if (currentLoopMode != 2) {
         ForceLoop = YES;
         %orig(2);
         ForceLoop = NO;
