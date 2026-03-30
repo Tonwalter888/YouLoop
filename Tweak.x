@@ -10,8 +10,7 @@
 #import <YouTubeHeader/YTInlinePlayerBarContainerView.h>
 
 #define TweakKey @"YouLoop"
-#define LOOP_KEY @"YouLoopKey"
-#define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:(k)]
+#define LoopStatusKey @"YouLoopStatusKey"
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
 @property (nonatomic, assign) YTPlayerViewController *parentViewController;
@@ -58,12 +57,16 @@ NSBundle *YouLoopBundle() {
     return bundle;
 }
 
-static NSBundle *tweakBundle = nil;
+static NSBundle *tweakBundle = YouLoopBundle();
+
+static BOOL shouldLoop() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
+}
 
 static BOOL ForceLoop = NO;
 
 static UIImage *YouLoopIcon(NSString *imageSize) {
-    UIColor *tintColor = IS_ENABLED(LOOP_KEY) ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
+    UIColor *tintColor = shouldLoop() ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     NSString *imageName = [NSString stringWithFormat:@"Loop@%@", imageSize];
     UIImage *base = [UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil];
     return [%c(QTMIcon) tintImage:base color:tintColor];
@@ -75,11 +78,11 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 - (void)didPressYouLoop {
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)self.activeVideoPlayerOverlay;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    BOOL LoopStatus = !IS_ENABLED(LOOP_KEY);
-    [[NSUserDefaults standardUserDefaults] setBool:LoopStatus forKey:LOOP_KEY];
+    BOOL setLoopStatus = !shouldLoop();
+    [[NSUserDefaults standardUserDefaults] setBool:setLoopStatus forKey:LOOP_KEY];
     [[NSUserDefaults standardUserDefaults] synchronize];
-    [autoplayController setLoopMode:LoopStatus ? 2 : 0];
-    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(LoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+    [autoplayController setLoopMode:setLoopStatus ? 2 : 0];
+    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(setLoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
 }
 
 %end
@@ -88,18 +91,14 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig;
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-    NSInteger currentLoopMode = [self loopMode];
-    if (self && shouldLoop && currentLoopMode != 2) {
+    if (self && shouldLoop()) {
         [self setLoopMode:2];
     }
     return self;
 }
 
 - (void)setLoopMode:(NSInteger)arg1 {
-    BOOL shouldLoop = IS_ENABLED(LOOP_KEY);
-    NSInteger currentLoopMode = [self loopMode];
-    if (!shouldLoop || ForceLoop || currentLoopMode == 2) {
+    if (!shouldLoop() || ForceLoop) {
         %orig;
         return;
     }
@@ -156,7 +155,6 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 %end
 
 %ctor {
-    tweakBundle = YouLoopBundle();
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"YouLoop",
         SelectorKey: @"didPressYouLoop:"
