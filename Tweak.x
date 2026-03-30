@@ -57,7 +57,7 @@ NSBundle *YouLoopBundle() {
     return bundle;
 }
 
-static NSBundle *tweakBundle = YouLoopBundle();
+static NSBundle *tweakBundle = nil;
 
 static BOOL shouldLoop() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
@@ -79,7 +79,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)self.activeVideoPlayerOverlay;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
     BOOL setLoopStatus = !shouldLoop();
-    [[NSUserDefaults standardUserDefaults] setBool:setLoopStatus forKey:LOOP_KEY];
+    [[NSUserDefaults standardUserDefaults] setBool:setLoopStatus forKey:LoopStatusKey];
     [[NSUserDefaults standardUserDefaults] synchronize];
     [autoplayController setLoopMode:setLoopStatus ? 2 : 0];
     [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(setLoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
@@ -155,6 +155,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 %end
 
 %ctor {
+    tweakBundle = YouLoopBundle();
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"YouLoop",
         SelectorKey: @"didPressYouLoop:"
