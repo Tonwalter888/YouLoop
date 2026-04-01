@@ -1,3 +1,4 @@
+// TODO - Sync loop button status with YT's loop button
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTMainAppVideoPlayerOverlayViewController.h>
