@@ -1,4 +1,5 @@
 // Settings
-
 "ENABLED" = "Show Loop button";
 "POSITION" = "Loop button position";
+"LOOP_DISABLED" = "Loop disabled";
+"LOOP_ENABLED" = "Loop enabled";
