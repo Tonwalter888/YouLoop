@@ -1,18 +1,16 @@
-#import <Foundation/Foundation.h>
-#import <AVFoundation/AVFoundation.h>
-#import <AVKit/AVKit.h>
-
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
-#import "../YouTubeHeader/YTColor.h"
-#import "../YouTubeHeader/YTMainAppVideoPlayerOverlayViewController.h"
-#import "../YouTubeHeader/YTMainAppVideoPlayerOverlayView.h"
-#import "../YouTubeHeader/YTMainAppControlsOverlayView.h"
-#import "../YouTubeHeader/YTPlayerViewController.h"
-#import "../YouTubeHeader/QTMIcon.h"
+#import <YouTubeHeader/YTColor.h>
+#import <YouTubeHeader/YTMainAppVideoPlayerOverlayViewController.h>
+#import <YouTubeHeader/YTMainAppVideoPlayerOverlayView.h>
+#import <YouTubeHeader/YTMainAppControlsOverlayView.h>
+#import <YouTubeHeader/YTInlinePlayerBarContainerView.h>
+#import <YouTubeHeader/YTPlayerViewController.h>
+#import <YouTubeHeader/QTMIcon.h>
+#import <YouTubeHeader/GOOHUDManagerInternal.h>
 
 #define TweakKey @"YouLoop"
-#define IS_ENABLED(k) [[NSUserDefaults standardUserDefaults] boolForKey:k]
+#define LoopStatusKey @"YouLoopStatus"
 
 @interface YTMainAppVideoPlayerOverlayViewController (YouLoop)
 @property (nonatomic, assign) YTPlayerViewController *parentViewController; // for accessing YTPlayerViewController
@@ -32,7 +30,6 @@
 @end
 
 @interface YTMainAppControlsOverlayView (YouLoop)
-@property (nonatomic, assign) YTPlayerViewController *playerViewController; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
@@ -41,22 +38,11 @@
 @end
 
 @interface YTInlinePlayerBarContainerView (YouLoop)
-@property (nonatomic, strong) YTInlinePlayerBarController *delegate; // for accessing YTPlayerViewController
 - (void)didPressYouLoop:(id)arg; // for custom button press
 @end
 
 @interface YTColor (YouLoop)
 + (UIColor *)lightRed; // for tinting the loop button when enabled
-@end
-
-// For displaying snackbars - @theRealfoxster
-@interface YTHUDMessage : NSObject
-+ (id)messageWithText:(id)text;
-- (void)setAction:(id)action;
-@end
-@interface GOOHUDManagerInternal : NSObject
-- (void)showMessageMainThread:(id)message;
-+ (id)sharedInstance;
 @end
 
 // Retrieves the bundle for the tweak
@@ -81,6 +67,10 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
     return [%c(QTMIcon) tintImage:[UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil] color:tintColor];
 }
 
+static BOOL shouldLoop() {
+    return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
+}
+
 %group Main
 %hook YTPlayerViewController
 // New method to enable looping on the current video, also stores state
@@ -96,11 +86,11 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         // Get the current loop state from the controller's method
         BOOL isLoopEnabled = ([autoplayController loopMode] == 0);
         // Update the key for later use
-        [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:@"defaultLoop_enabled"];
+        [[NSUserDefaults standardUserDefaults] setBool:isLoopEnabled forKey:LoopStatusKey];
         // Set the loop mode to the opposite of the current state
         [autoplayController setLoopMode:isLoopEnabled ? 2 : 0];
         // Display snackbar
-        [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(isLoopEnabled ? @"Loop enabled" : @"Loop disabled")]];
+        [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(isLoopEnabled ? @"LOOP_ENABLED" : @"LOOP_DISABLED")]];
     }
 }
 %end
@@ -110,7 +100,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
     if (self) {
-        if (IS_ENABLED(@"defaultLoop_enabled")) {
+        if (shouldLoop()) {
             [self setLoopMode:2];
         }
     }
@@ -118,10 +108,11 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 }
 // Modify the setter to always follow the user's preference. This breaks normal functionality
 - (void)setLoopMode:(NSInteger)arg1 {
-    if (IS_ENABLED(@"defaultLoop_enabled")) {
-        arg1 = 2;
+    if (!shouldLoop()) {
+        %orig(arg1);
+        return;
     }
-    %orig;
+    %orig(2);
 }
 %end
 %end
