@@ -76,7 +76,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 - (void)didPressYouLoop {
     YTMainAppVideoPlayerOverlayViewController *playerOverlay = (YTMainAppVideoPlayerOverlayViewController *)self.activeVideoPlayerOverlay;
     YTAutoplayAutonavController *autoplayController = (YTAutoplayAutonavController *)[playerOverlay valueForKey:@"_autonavController"];
-    BOOL setLoopStatus = !shouldLoop();
+    BOOL setLoopStatus = ([autoplayController loopMode] == 0);;
     [[NSUserDefaults standardUserDefaults] setBool:setLoopStatus forKey:LoopStatusKey];
     [autoplayController setLoopMode:setLoopStatus ? 2 : 0];
     [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(setLoopStatus ? @"LOOP_ENABLED" : @"LOOP_DISABLED")]];
