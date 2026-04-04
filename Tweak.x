@@ -1,4 +1,3 @@
-// TODO - Sync loop button status with YT's loop button
 #import "../YTVideoOverlay/Header.h"
 #import "../YTVideoOverlay/Init.x"
 #import <YouTubeHeader/YTMainAppVideoPlayerOverlayViewController.h>
@@ -64,8 +63,6 @@ static BOOL shouldLoop() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
 }
 
-static BOOL ForceLoop = NO;
-
 static UIImage *YouLoopIcon(NSString *imageSize) {
     UIColor *tintColor = shouldLoop() ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     NSString *imageName = [NSString stringWithFormat:@"Loop@%@", imageSize];
@@ -82,31 +79,27 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     BOOL setLoopStatus = !shouldLoop();
     [[NSUserDefaults standardUserDefaults] setBool:setLoopStatus forKey:LoopStatusKey];
     [autoplayController setLoopMode:setLoopStatus ? 2 : 0];
-    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:(setLoopStatus ? LOC(@"LOOP_ENABLED") : LOC(@"LOOP_DISABLED"))]];
+    [[%c(GOOHUDManagerInternal) sharedInstance] showMessageMainThread:[%c(YTHUDMessage) messageWithText:LOC(setLoopStatus ? @"LOOP_ENABLED" : @"LOOP_DISABLED")]];
 }
-
 %end
 
 %hook YTAutoplayAutonavController
-
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig;
-    if (self && shouldLoop()) {
-        [self setLoopMode:2];
+    if (self) {
+        if (shouldLoop()) {
+            [self setLoopMode:2];
+        }
     }
     return self;
 }
-
 - (void)setLoopMode:(NSInteger)arg1 {
-    if (!shouldLoop() || ForceLoop) {
+    if (!shouldLoop()) {
         %orig;
         return;
     }
-    ForceLoop = YES;
     %orig(2);
-    ForceLoop = NO;
 }
-
 %end
 %end
 
@@ -125,7 +118,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     YTMainAppVideoPlayerOverlayView *mainOverlayView = (YTMainAppVideoPlayerOverlayView *)self.superview;
     YTMainAppVideoPlayerOverlayViewController *mainOverlayController = (YTMainAppVideoPlayerOverlayViewController *)mainOverlayView.delegate;
     YTPlayerViewController *pvc = mainOverlayController.parentViewController;
-    if (pvc) [pvc didPressYouLoop];
+    [pvc didPressYouLoop];
     [self.overlayButtons[TweakKey] setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
 }
 
@@ -147,7 +140,7 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
     YTInlinePlayerBarController *delegate = self.delegate;
     YTMainAppVideoPlayerOverlayViewController *_delegate = [delegate valueForKey:@"_delegate"];
     YTPlayerViewController *pvc = _delegate.parentViewController;
-    if (pvc) [pvc didPressYouLoop];
+    [pvc didPressYouLoop];
     [self.overlayButtons[TweakKey] setImage:YouLoopIcon(@"3") forState:UIControlStateNormal];
 }
 

@@ -1,6 +1,6 @@
 Package: dev.water888.youloop
 Name: YouLoop
-Version: 1.1.9
+Version: 1.1.10
 Architecture: iphoneos-arm
 Description: Adds a player button to enable/disable video looping.
 Maintainer: Tonwalter888
