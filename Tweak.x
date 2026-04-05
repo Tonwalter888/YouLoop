@@ -86,10 +86,8 @@ static UIImage *YouLoopIcon(NSString *imageSize) {
 %hook YTAutoplayAutonavController
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig;
-    if (self) {
-        if (shouldLoop()) {
-            [self setLoopMode:2];
-        }
+    if (self && shouldLoop()) {
+        [self setLoopMode:2];
     }
     return self;
 }
