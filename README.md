@@ -1,4 +1,7 @@
 # YouLoop
+
+**Will archive this repo if this have been merged.**
+
 Adds a player button to enable/disable looping on the current video.
 
 Repeat icons created by Uniconlabs - Flaticon.
