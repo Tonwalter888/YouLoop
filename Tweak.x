@@ -99,7 +99,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %hook YTAutoplayAutonavController
 // Modify the initializer to set the loop mode to the user's preference
 - (id)initWithParentResponder:(id)arg1 {
-    self = %orig(arg1);
+    self = %orig;
     if (self && shouldLoop()) {
         [self setLoopMode:2];
     }
@@ -108,7 +108,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 // Modify the setter to always follow the user's preference. This breaks normal functionality
 - (void)setLoopMode:(NSInteger)arg1 {
     if (!shouldLoop()) {
-        %orig(arg1);
+        %orig;
         return;
     }
     %orig(2);
