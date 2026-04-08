@@ -99,10 +99,8 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 // Modify the initializer to set the loop mode to the user's preference
 - (id)initWithParentResponder:(id)arg1 {
     self = %orig(arg1);
-    if (self) {
-        if (shouldLoop()) {
-            [self setLoopMode:2];
-        }
+    if (self && shouldLoop()) {
+        [self setLoopMode:2];
     }
     return self;
 }
