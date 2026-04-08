@@ -58,7 +58,7 @@ NSBundle *YouLoopBundle() {
     });
     return bundle;
 }
-static NSBundle *tweakBundle = nil; // not sure why I need to store tweakBundle
+static NSBundle *tweakBundle = nil;
 
 static BOOL shouldLoop() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
@@ -136,7 +136,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [playerViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
+    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
 }
 
 %end
@@ -164,14 +164,14 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [parentViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:0];
+    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
 }
 
 %end
 %end
 
 %ctor {
-    tweakBundle = YouLoopBundle(); // not sure why I need to store tweakBundle
+    tweakBundle = YouLoopBundle();
     // Setup as defined in the example from YTVideoOverlay
     initYTVideoOverlay(TweakKey, @{
         AccessibilityLabelKey: @"Toggle Loop",
