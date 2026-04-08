@@ -58,6 +58,7 @@ NSBundle *YouLoopBundle() {
     });
     return bundle;
 }
+
 static NSBundle *tweakBundle = nil;
 
 static BOOL shouldLoop() {
