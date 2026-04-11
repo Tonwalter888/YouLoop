@@ -66,9 +66,9 @@ static BOOL shouldLoop() {
 }
 
 // Get the image for the loop button based on the given state and size
-static UIImage *getYouLoopImage(NSString *imageSize) {
+static UIImage *loopIcon() {
     UIColor *tintColor = shouldLoop() ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
-    NSString *imageName = [NSString stringWithFormat:@"PlayerLoop@%@", imageSize];
+    NSString *imageName = [NSString stringWithFormat:@"LoopIcon"];
     return [%c(QTMIcon) tintImage:[UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil] color:tintColor];
 }
 
@@ -123,7 +123,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %hook YTMainAppControlsOverlayView
 
 - (UIImage *)buttonImage:(NSString *)tweakId {
-    return [tweakId isEqualToString:TweakKey] ? getYouLoopImage(@"3") : %orig;
+    return [tweakId isEqualToString:TweakKey] ? loopIcon() : %orig;
 }
 
 // Custom method to handle the button press
@@ -137,7 +137,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [playerViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
+    [self.overlayButtons[TweakKey] setImage:loopIcon() forState:UIControlStateNormal];
 }
 
 %end
@@ -150,7 +150,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
 %hook YTInlinePlayerBarContainerView
 
 - (UIImage *)buttonImage:(NSString *)tweakId {
-    return [tweakId isEqualToString:TweakKey] ? getYouLoopImage(@"3") : %orig;
+    return [tweakId isEqualToString:TweakKey] ? loopIcon() : %orig;
 }
 
 // Custom method to handle the button press
@@ -165,7 +165,7 @@ static UIImage *getYouLoopImage(NSString *imageSize) {
         [parentViewController didPressYouLoop];
     }
     // Update button color
-    [self.overlayButtons[TweakKey] setImage:getYouLoopImage(@"3") forState:UIControlStateNormal];
+    [self.overlayButtons[TweakKey] setImage:loopIcon() forState:UIControlStateNormal];
 }
 
 %end
