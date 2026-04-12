@@ -65,7 +65,7 @@ jobs:
          overwrite: true
 
       - name: Create a draft release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v${{ env.YOULOOP_VERSION }}
           name: v${{ env.YOULOOP_VERSION }} 
