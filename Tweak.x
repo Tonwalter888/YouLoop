@@ -68,7 +68,7 @@ static BOOL shouldLoop() {
 // Get the image for the loop button
 static UIImage *loopIcon() {
     UIColor *tintColor = shouldLoop() ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
-    NSString *imageName = [NSString stringWithFormat:@"LoopIcon"];
+    NSString *imageName = [NSString stringWithFormat:@"LoopIcon@3"];
     UIImage *base = [UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil];
     return [%c(QTMIcon) tintImage:base color:tintColor];
 }
