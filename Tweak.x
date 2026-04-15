@@ -65,11 +65,12 @@ static BOOL shouldLoop() {
     return [[NSUserDefaults standardUserDefaults] boolForKey:LoopStatusKey];
 }
 
-// Get the image for the loop button based on the given state and size
+// Get the image for the loop button
 static UIImage *loopIcon() {
     UIColor *tintColor = shouldLoop() ? [%c(YTColor) lightRed] : [%c(YTColor) white1];
     NSString *imageName = [NSString stringWithFormat:@"LoopIcon"];
-    return [%c(QTMIcon) tintImage:[UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil] color:tintColor];
+    UIImage *base = [UIImage imageNamed:imageName inBundle:YouLoopBundle() compatibleWithTraitCollection:nil];
+    return [%c(QTMIcon) tintImage:base color:tintColor];
 }
 
 %group Main
