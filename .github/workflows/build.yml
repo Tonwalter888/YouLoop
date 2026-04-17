@@ -3,6 +3,11 @@ on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: false
+        default: 'main'
    
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -45,7 +50,7 @@ jobs:
         run: git clone --quiet --depth=1 https://github.com/PoomSmart/YTVideoOverlay.git
 
       - name: Clone YouLoop
-        run: git clone --quiet --depth=1 https://github.com/bhackel/YouLoop.git
+        run: git clone --quiet --depth=1 --branch ${{ inputs.branch }} ${{ github.server_url }}/${{ github.repository }}.git YouLoop
 
       - name: Build YouLoop
         run: |
